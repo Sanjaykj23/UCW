@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+/frontend/node_modules
+/.pnp
+.pnp.*
+
+# Python Virtual Environments & Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+*.pytest_cache/
+
+# Backend Uploads & Data
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.exe
+storage-engine.exe
+data/rocksdb/
+backend/storage-engine/data/
+
+# Testing
+/coverage
+
+# Next.js Build Outputs
+/.next/
+/frontend/.next/
+/out/
+
+# Production
+/build
+
+# Miscellaneous
+.DS_Store
+*.pem
+*.log
+
+# Debug Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment Variables (Keep credentials secret)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+frontend/.env.local
+backend/.env
+
+# Vercel
+.vercel
+
+# TypeScript & Next.js Types
+*.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,21 @@
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables
+.env
+.env.*
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Uploads directory (keep directory via .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+# SQLite database if used
+*.db
+*.sqlite3
