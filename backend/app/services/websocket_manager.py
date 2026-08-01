@@ -35,22 +35,23 @@ class ConnectionManager:
     async def connect(self, user_id: str, websocket: WebSocket):
         """Accepts incoming socket handshake and stores connection in memory registry."""
         await websocket.accept()
-        self.active_connections[str(user_id)] = websocket
-        logger.info(f"WebSocket Connected: User ID {user_id}. Total active: {len(self.active_connections)}")
+        key = str(user_id).lower().strip()
+        self.active_connections[key] = websocket
+        logger.info(f"WebSocket Connected: User ID {key}. Total active: {len(self.active_connections)}")
 
     def disconnect(self, user_id: str):
         """Removes user connection from memory registry on socket disconnect."""
-        key = str(user_id)
+        key = str(user_id).lower().strip()
         if key in self.active_connections:
             del self.active_connections[key]
-            logger.info(f"WebSocket Disconnected: User ID {user_id}. Remaining active: {len(self.active_connections)}")
+            logger.info(f"WebSocket Disconnected: User ID {key}. Remaining active: {len(self.active_connections)}")
 
     async def send_personal_message(self, message: Dict[str, Any], receiver_id: str) -> bool:
         """
         Sends a JSON frame to a specific connected user if they are currently online.
         Returns True if delivered over WebSocket, False if user is offline.
         """
-        key = str(receiver_id)
+        key = str(receiver_id).lower().strip()
         if key in self.active_connections:
             try:
                 ws = self.active_connections[key]

@@ -119,7 +119,11 @@ const ChatSection = ({ currentUser: propUser }) => {
       return;
     }
 
-    const wsUrl = `${WS_BASE_URL}/ws/chat/${userId}`;
+    let rawUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_API_URL || 'ws://localhost:8000';
+    let baseWs = rawUrl.trim().replace(/^http:/i, 'ws:').replace(/^https:/i, 'wss:');
+    if (baseWs.endsWith('/')) baseWs = baseWs.slice(0, -1);
+    const wsUrl = `${baseWs}/ws/chat/${userId}`;
+
     console.log('[WEBSOCKET_DEBUG] Connecting:', wsUrl);
 
     const ws = new WebSocket(wsUrl);
