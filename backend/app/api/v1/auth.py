@@ -60,7 +60,7 @@ def register_user(req: UserRegisterRequest, response: Response, db: Session = De
         password_hash=hashed_pwd,
         google_id=req.google_token[:50] if req.google_token else None,
         email_verified=True,
-        profile_photo=None,
+        profile_photo=req.profile_photo if req.profile_photo else None,
         bio=None,
         skills="Next.js, Python, PostgreSQL, FastAPI",
         interests="Web Development, Cyber Security"
@@ -108,6 +108,11 @@ def google_login(payload: GoogleVerifyRequest, response: Response, db: Session =
     
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="EMAIL_NOT_REGISTERED")
+
+    if google_info.get("picture") and not user.profile_photo:
+        user.profile_photo = google_info["picture"]
+        db.commit()
+        db.refresh(user)
 
     access_token = create_access_token(data={"sub": user.username, "email": user.email})
 

@@ -14,7 +14,7 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=True)
     phone_number = Column(String(20), nullable=True)
     password_hash = Column(String(255), nullable=True)
-    profile_photo = Column(String(255), nullable=True)
+    profile_photo = Column(Text, nullable=True)
     banner_photo = Column(Text, nullable=True)
     area = Column(String(100), nullable=True)
     google_id = Column(String(255), nullable=True)

@@ -21,6 +21,7 @@ class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str
     google_token: Optional[str] = None
+    profile_photo: Optional[str] = None
 
 class UserLoginRequest(BaseModel):
     identifier: str

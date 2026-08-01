@@ -65,11 +65,23 @@ export default function HomePage() {
     }
   };
 
-  const completeAvatarSetup = (avatarData) => {
+  const completeAvatarSetup = async (avatarData) => {
     if (typeof window !== 'undefined' && currentUser) {
-      const updatedUser = { ...currentUser, avatar: avatarData || 'skipped', profile_photo: avatarData || 'skipped' };
+      const photoVal = avatarData || 'skipped';
+      const updatedUser = { ...currentUser, avatar: photoVal, profile_photo: photoVal };
       setCurrentUser(updatedUser);
       setShowAvatarSetup(false);
+
+      try {
+        await fetch(`${API_BASE_URL}/api/users/profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ profile_photo: photoVal }),
+        });
+      } catch (err) {
+        console.error('Failed to sync avatar setup to server:', err);
+      }
     }
   };
 
