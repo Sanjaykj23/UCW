@@ -15,15 +15,15 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 COOKIE_MAX_AGE = 3600  # 60 minutes (1 hour)
 
 def set_auth_cookie(response: Response, token: str):
-    """Sets secure HttpOnly cookie for session token with 60-minute expiration."""
+    """Sets secure HttpOnly cookie for session token (supports Vercel + Render cross-site auth)."""
     response.set_cookie(
         key="ucw_access_token",
         value=token,
         httponly=True,
         max_age=COOKIE_MAX_AGE,
         expires=COOKIE_MAX_AGE,
-        samesite="lax",
-        secure=False  # True in HTTPS production
+        samesite="none",
+        secure=True
     )
 
 @router.post("/google-verify", response_model=GoogleVerifyResponse)
@@ -123,7 +123,7 @@ def google_login(payload: GoogleVerifyRequest, response: Response, db: Session =
 @router.post("/logout")
 def logout_user(response: Response):
     """Clears the HttpOnly authentication cookie."""
-    response.delete_cookie(key="ucw_access_token", samesite="lax")
+    response.delete_cookie(key="ucw_access_token", samesite="none", secure=True)
     return {"status": "success", "message": "Logged out successfully"}
 
 @router.get("/me", response_model=UserResponse)
