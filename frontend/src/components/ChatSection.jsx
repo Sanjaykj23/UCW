@@ -335,31 +335,32 @@ const ChatSection = ({ currentUser: propUser }) => {
 
   return (
     <div className="w-full h-full flex flex-col bg-black text-white relative z-10 overflow-hidden">
-      {/* Top Horizontal Navbar: Active Channels Bar */}
-      <div className="w-full border-b-2 border-white bg-black p-3 flex items-center gap-3 shrink-0 overflow-x-auto custom-scrollbar">
-        <div className="flex items-center gap-2 bg-white/10 border border-white/40 px-3 py-2 shrink-0">
-          <span className="font-mono text-xs font-black tracking-widest text-white uppercase">
+      {/* Top Horizontal Navbar: All Active User Channels */}
+      <div className="w-full border-b-2 border-white bg-black p-3 flex items-center gap-3 shrink-0 overflow-x-auto custom-scrollbar z-20 shadow-[0px_4px_10px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center gap-2 bg-white text-black px-3 py-2 shrink-0 font-bold border border-white">
+          <span className="font-mono text-xs font-black tracking-widest uppercase">
             [+] ACTIVE_CHANNELS
           </span>
-          <span className="bg-white text-black px-1.5 py-0.5 text-[10px] font-mono font-bold">
+          <span className="bg-black text-white px-2 py-0.5 text-[10px] font-mono font-bold">
             {connections.length}
           </span>
         </div>
 
-        {/* Horizontal Contact Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1">
+        {/* Horizontal Scrollable Contact Pills for ALL Users */}
+        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1 py-1">
           {connections.map((conn) => {
             const isSelected = activeChat?.other_user_id === conn.other_user_id;
             const avatarUrl = formatAvatarUrl(conn.other_profile_photo);
 
             return (
-              <div
+              <button
                 key={conn.connection_id}
+                type="button"
                 onClick={() => handleSelectChat(conn)}
-                className={`px-3 py-2 flex items-center gap-2.5 cursor-pointer border shrink-0 transition-all font-mono text-xs ${
+                className={`px-3 py-2 flex items-center gap-2.5 cursor-pointer border shrink-0 transition-all font-mono text-xs uppercase ${
                   isSelected
-                    ? 'bg-white text-black font-bold border-white shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]'
-                    : 'bg-black text-white border-white/30 hover:border-white hover:bg-white/10'
+                    ? 'bg-emerald-400 text-black font-extrabold border-white shadow-[3px_3px_0px_0px_rgba(255,255,255,1)]'
+                    : 'bg-black text-white border-white/40 hover:border-white hover:bg-white/20'
                 }`}
               >
                 <div className="w-6 h-6 bg-black text-white flex items-center justify-center font-black text-[10px] overflow-hidden border border-white shrink-0">
@@ -373,11 +374,11 @@ const ChatSection = ({ currentUser: propUser }) => {
                     conn.other_username.substring(0, 2).toUpperCase()
                   )}
                 </div>
-                <span className="truncate max-w-[120px] uppercase font-bold">
+                <span className="truncate max-w-[130px] font-bold">
                   {conn.other_display_name || conn.other_username}
                 </span>
-                <span className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? 'bg-emerald-600' : 'bg-emerald-400'}`} />
-              </div>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? 'bg-black' : 'bg-emerald-400'}`} />
+              </button>
             );
           })}
         </div>

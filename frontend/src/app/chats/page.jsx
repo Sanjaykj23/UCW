@@ -62,7 +62,7 @@ export default function ChatsPage() {
           avatar={currentUser.profile_photo || currentUser.avatar}
         />
 
-        <main className="flex-1 overflow-hidden relative">
+        <main className="flex-1 overflow-hidden relative pb-24">
           <ChatSection currentUser={currentUser} />
         </main>
 
