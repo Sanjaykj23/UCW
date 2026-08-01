@@ -263,44 +263,60 @@ const ChatSection = ({ currentUser: propUser }) => {
     const currentUserId = currentUser?.user_id || currentUser?.id;
     const textToSend = msgInput.trim();
     const nowTime = formatMessageTime(new Date().toISOString());
+    const tempId = `msg_${Date.now()}`;
 
     setMsgInput('');
 
     // Append sender message immediately to bottom of UI
-    const tempId = Date.now();
-    setChatHistory((prev) => [
-      ...prev,
-      {
-        id: tempId,
-        sender: 'me',
-        text: textToSend,
-        time: nowTime,
-        sender_id: currentUserId,
-        receiver_id: activeChat.other_user_id,
-      },
-    ]);
+    setChatHistory((prev) => {
+      const exists = prev.some((m) => String(m.id) === String(tempId));
+      if (exists) return prev;
+      return [
+        ...prev,
+        {
+          id: tempId,
+          sender: 'me',
+          text: textToSend,
+          time: nowTime,
+          sender_id: currentUserId,
+          receiver_id: activeChat.other_user_id,
+        },
+      ];
+    });
 
     const payload = {
       type: 'chat_message',
+      message_id: tempId,
       sender_id: currentUserId,
       receiver_id: activeChat.other_user_id,
       content: textToSend,
       created_at: new Date().toISOString(),
     };
 
+    // 1. Send via WebSocket if socket is open
+    let socketDelivered = false;
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(payload));
-    } else {
       try {
-        await fetch(`${API_BASE_URL}/api/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload),
-        });
+        socketRef.current.send(JSON.stringify(payload));
+        socketDelivered = true;
       } catch (err) {
-        console.error('HTTP send failed:', err);
+        console.error('WebSocket send error:', err);
       }
+    }
+
+    // 2. Always backup send via REST API to guarantee PostgreSQL & RocksDB persistence for every message
+    try {
+      await fetch(`${API_BASE_URL}/api/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error('HTTP REST send failed:', err);
+    }
+
+    if (!socketDelivered) {
       connectWebSocket();
     }
   };

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSock
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 
-from app.core.database import get_db
+from app.core.database import get_db, SessionLocal
 from app.models.user import User
 from app.models.message import Message
 from app.services.storage_service import storage_service
@@ -268,7 +268,8 @@ async def websocket_chat_endpoint(
                     auth_tag=payload.get("auth_tag", "")
                 )
 
-                # 2. Persist Message Metadata to PostgreSQL Database
+                # 2. Persist Message Metadata to PostgreSQL Database using fresh SessionLocal per message
+                db_sess = SessionLocal()
                 try:
                     msg_obj = Message(
                         message_id=uuid.UUID(message_id) if isinstance(message_id, str) and len(message_id) == 36 else uuid.uuid4(),
@@ -276,12 +277,14 @@ async def websocket_chat_endpoint(
                         receiver_id=uuid.UUID(receiver_id),
                         content=content,
                         is_read=False,
-                        created_at=datetime.datetime.utcnow()
+                        created_at=datetime.datetime.now(datetime.timezone.utc)
                     )
-                    db.add(msg_obj)
-                    db.commit()
+                    db_sess.add(msg_obj)
+                    db_sess.commit()
                 except Exception:
-                    db.rollback()
+                    db_sess.rollback()
+                finally:
+                    db_sess.close()
 
                 # 3. Construct Realtime Outgoing Socket Frame
                 outgoing_frame = {
@@ -291,18 +294,19 @@ async def websocket_chat_endpoint(
                     "sender_id": str(client_id),
                     "receiver_id": str(receiver_id),
                     "content": content,
-                    "created_at": datetime.datetime.utcnow().isoformat()
+                    "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
                 }
 
-                # 4. Route Realtime Frame to Receiver if Connected
+                # 4. Route Realtime Frame to Receiver & Sender if Connected
                 delivered = await manager.send_personal_message(outgoing_frame, receiver_id)
+                await manager.send_personal_message(outgoing_frame, client_id)
 
                 # 5. Send ACK Confirmation to Sender
                 ack_frame = {
                     "type": "message_ack",
                     "message_id": message_id,
                     "status": "DELIVERED" if delivered else "SENT_OFFLINE",
-                    "created_at": datetime.datetime.utcnow().isoformat()
+                    "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
                 }
                 await websocket.send_text(json.dumps(ack_frame))
 
