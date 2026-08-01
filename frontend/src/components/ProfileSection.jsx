@@ -247,7 +247,9 @@ const ProfileSection = ({ username, avatar }) => {
 
   const handleShareId = () => {
     const activeUsername = profileData?.username || username;
-    navigator.clipboard.writeText(`ucw.app/user/${activeUsername}`);
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ucw-kappa.vercel.app';
+    const profileUrl = `${origin}/user/${activeUsername}`;
+    navigator.clipboard.writeText(profileUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

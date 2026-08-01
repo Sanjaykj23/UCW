@@ -334,19 +334,20 @@ const ChatSection = ({ currentUser: propUser }) => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col md:flex-row bg-black text-white relative z-10 overflow-hidden">
-      {/* Sidebar: Connections List */}
-      <div className="w-full md:w-80 border-r-2 border-white flex flex-col bg-black shrink-0 h-48 md:h-full overflow-y-auto custom-scrollbar">
-        <div className="p-4 border-b-2 border-white bg-black sticky top-0 z-10">
-          <h3 className="font-mono text-xs font-black tracking-widest text-white uppercase flex items-center justify-between">
-            <span>[+] ACTIVE_CHANNELS</span>
-            <span className="bg-white text-black px-1.5 py-0.5 text-[10px]">
-              {connections.length}
-            </span>
-          </h3>
+    <div className="w-full h-full flex flex-col bg-black text-white relative z-10 overflow-hidden">
+      {/* Top Horizontal Navbar: Active Channels Bar */}
+      <div className="w-full border-b-2 border-white bg-black p-3 flex items-center gap-3 shrink-0 overflow-x-auto custom-scrollbar">
+        <div className="flex items-center gap-2 bg-white/10 border border-white/40 px-3 py-2 shrink-0">
+          <span className="font-mono text-xs font-black tracking-widest text-white uppercase">
+            [+] ACTIVE_CHANNELS
+          </span>
+          <span className="bg-white text-black px-1.5 py-0.5 text-[10px] font-mono font-bold">
+            {connections.length}
+          </span>
         </div>
 
-        <div className="divide-y divide-white/20">
+        {/* Horizontal Contact Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1">
           {connections.map((conn) => {
             const isSelected = activeChat?.other_user_id === conn.other_user_id;
             const avatarUrl = formatAvatarUrl(conn.other_profile_photo);
@@ -355,11 +356,13 @@ const ChatSection = ({ currentUser: propUser }) => {
               <div
                 key={conn.connection_id}
                 onClick={() => handleSelectChat(conn)}
-                className={`p-4 flex items-center gap-3 cursor-pointer transition-colors ${
-                  isSelected ? 'bg-white text-black font-bold' : 'hover:bg-white/10 text-white'
+                className={`px-3 py-2 flex items-center gap-2.5 cursor-pointer border shrink-0 transition-all font-mono text-xs ${
+                  isSelected
+                    ? 'bg-white text-black font-bold border-white shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]'
+                    : 'bg-black text-white border-white/30 hover:border-white hover:bg-white/10'
                 }`}
               >
-                <div className="w-10 h-10 bg-black text-white flex items-center justify-center font-black font-mono text-sm overflow-hidden border border-white shrink-0">
+                <div className="w-6 h-6 bg-black text-white flex items-center justify-center font-black text-[10px] overflow-hidden border border-white shrink-0">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
@@ -370,23 +373,17 @@ const ChatSection = ({ currentUser: propUser }) => {
                     conn.other_username.substring(0, 2).toUpperCase()
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-baseline">
-                    <h4 className="font-mono text-sm truncate uppercase font-bold">
-                      {conn.other_display_name || conn.other_username}
-                    </h4>
-                  </div>
-                  <p className={`font-mono text-[10px] truncate uppercase ${isSelected ? 'text-black/70' : 'text-emerald-400'}`}>
-                    @{conn.other_username} &bull; ACTIVE
-                  </p>
-                </div>
+                <span className="truncate max-w-[120px] uppercase font-bold">
+                  {conn.other_display_name || conn.other_username}
+                </span>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? 'bg-emerald-600' : 'bg-emerald-400'}`} />
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Main Chat View */}
+      {/* Main Full-Width Chat View */}
       {activeChat && (
         <div className="flex-1 flex flex-col h-full bg-black relative min-w-0">
           {/* Chat Header */}
@@ -404,7 +401,7 @@ const ChatSection = ({ currentUser: propUser }) => {
                 )}
               </div>
               <div>
-                <h4 className="text-white font-black tracking-widest text-sm">
+                <h4 className="text-white font-black tracking-widest text-sm uppercase">
                   {activeChat.other_display_name || activeChat.other_username}
                 </h4>
                 <p className="text-[10px] font-mono text-emerald-400 uppercase">
