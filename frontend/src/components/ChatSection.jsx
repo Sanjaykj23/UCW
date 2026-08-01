@@ -99,7 +99,7 @@ const ChatSection = ({ currentUser: propUser }) => {
       if (res.ok) {
         const data = await res.json();
         setConnections(data);
-        if (data.length > 0) {
+        if (data.length > 0 && !activeChatRef.current) {
           handleSelectChat(data[0]);
         }
       }
@@ -206,7 +206,9 @@ const ChatSection = ({ currentUser: propUser }) => {
 
   // 4. Load Chat History
   const handleSelectChat = async (conn) => {
+    if (!conn) return;
     setActiveChat(conn);
+    activeChatRef.current = conn;
     setChatHistory([
       { id: 'sys-init', sender: 'system', text: `ENCRYPTED SESSION INITIALIZED WITH @${conn.other_username}`, time: 'SYSTEM' },
     ]);
@@ -335,21 +337,21 @@ const ChatSection = ({ currentUser: propUser }) => {
 
   return (
     <div className="w-full h-full flex flex-col bg-black text-white relative z-10 overflow-hidden">
-      {/* Top Horizontal Navbar: All Active User Channels */}
-      <div className="w-full border-b-2 border-white bg-black p-3 flex items-center gap-3 shrink-0 overflow-x-auto custom-scrollbar z-20 shadow-[0px_4px_10px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-2 bg-white text-black px-3 py-2 shrink-0 font-bold border border-white">
-          <span className="font-mono text-xs font-black tracking-widest uppercase">
-            [+] ACTIVE_CHANNELS
-          </span>
-          <span className="bg-black text-white px-2 py-0.5 text-[10px] font-mono font-bold">
+      {/* Separate Dedicated Sticky Top Navbar Div for Connected Users */}
+      <div className="w-full bg-black border-b-2 border-white p-3 flex flex-wrap items-center gap-2 shrink-0 z-30 shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+        <div className="bg-white text-black font-black font-mono text-xs px-3 py-2 uppercase border border-white flex items-center gap-2 shrink-0">
+          <span>[+] CONNECTED_CHANNELS</span>
+          <span className="bg-black text-white px-2 py-0.5 text-[10px] font-mono">
             {connections.length}
           </span>
         </div>
 
-        {/* Horizontal Scrollable Contact Pills for ALL Users */}
-        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1 py-1">
+        {/* Static Flex-Wrap Buttons for ALL Connected Users */}
+        <div className="flex flex-wrap items-center gap-2">
           {connections.map((conn) => {
-            const isSelected = activeChat?.other_user_id === conn.other_user_id;
+            const currentActiveId = String(activeChat?.other_user_id || '').toLowerCase();
+            const connOtherId = String(conn.other_user_id || '').toLowerCase();
+            const isSelected = currentActiveId === connOtherId;
             const avatarUrl = formatAvatarUrl(conn.other_profile_photo);
 
             return (
@@ -386,7 +388,7 @@ const ChatSection = ({ currentUser: propUser }) => {
 
       {/* Main Full-Width Chat View */}
       {activeChat && (
-        <div className="flex-1 flex flex-col h-full bg-black relative min-w-0">
+        <div className="flex-1 flex flex-col min-h-0 bg-black relative min-w-0">
           {/* Chat Header */}
           <div className="px-4 py-3 border-b-2 border-white flex justify-between items-center bg-black shrink-0">
             <div className="flex items-center gap-3">
